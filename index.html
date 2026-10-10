@@ -2,14 +2,16 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ZXOVA — Control Panel v4</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="format-detection" content="telephone=no">
+<meta name="mobile-web-app-capable" content="yes">
+<title>ZXOVA — Control Panel v4.1</title>
 <style>
 /* ============================================================
-   ZXOVA CONTROL PANEL v4.0
-   - Auth: key input
-   - Tabs: MENU / DNS
-   - DNS: toggle + download .mobileconfig
+   ZXOVA CONTROL PANEL v4.1
+   + Anti-zoom (mobile & desktop)
    ============================================================ */
 
 *,
@@ -19,11 +21,28 @@
   padding: 0;
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+html {
+  /* Chống pinch zoom */
+  touch-action: pan-x pan-y;
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 html, body {
   height: 100%;
   overflow-x: hidden;
+  /* Chống pinch zoom + double-tap zoom */
+  touch-action: manipulation;
+  -ms-touch-action: manipulation;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 :root {
@@ -128,7 +147,14 @@ body::after {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* Floating particles */
+/* Disable text selection but allow input */
+input, textarea, [contenteditable] {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
 .particles {
   position: fixed;
   inset: 0;
@@ -149,16 +175,10 @@ body::after {
 }
 
 @keyframes floatUp {
-  0% {
-    opacity: 0;
-    transform: translateY(100vh) scale(0.5);
-  }
+  0% { opacity: 0; transform: translateY(100vh) scale(0.5); }
   10% { opacity: 0.7; }
   90% { opacity: 0.7; }
-  100% {
-    opacity: 0;
-    transform: translateY(-10vh) scale(1.2);
-  }
+  100% { opacity: 0; transform: translateY(-10vh) scale(1.2); }
 }
 
 /* ============================================================
@@ -327,9 +347,7 @@ body::after {
 /* ============================================================
    VIEWS
    ============================================================ */
-.view {
-  display: none;
-}
+.view { display: none; }
 
 .view.active {
   display: block;
@@ -423,7 +441,7 @@ body::after {
   border-radius: var(--r-md);
   padding: 14px 16px;
   font-family: inherit;
-  font-size: 14px;
+  font-size: 16px;
   letter-spacing: 1.5px;
   color: var(--text-0);
   outline: none;
@@ -567,7 +585,7 @@ body::after {
 }
 
 /* ============================================================
-   KEY INFO PANEL (after login)
+   KEY INFO PANEL
    ============================================================ */
 .key-info {
   background: rgba(168, 85, 247, 0.10);
@@ -1238,7 +1256,7 @@ body::after {
 }
 
 /* ============================================================
-   STEPS GUIDE
+   STEPS
    ============================================================ */
 .steps {
   background: rgba(26, 15, 46, 0.6);
@@ -1348,7 +1366,7 @@ body::after {
 }
 
 /* ============================================================
-   DOWNLOAD DNS BUTTON
+   DOWNLOAD DNS
    ============================================================ */
 .download-section {
   margin-bottom: 14px;
@@ -1424,7 +1442,6 @@ body::after {
   animation: spin 0.7s linear infinite;
 }
 
-/* Info panel for download */
 .download-info {
   background: rgba(74, 222, 128, 0.08);
   border: 1px solid rgba(74, 222, 128, 0.3);
@@ -1481,6 +1498,11 @@ body::after {
 .download-info-value.green {
   color: var(--success-bright);
   text-shadow: 0 0 8px rgba(134, 239, 172, 0.5);
+}
+
+.download-info-value.purple {
+  color: var(--purple-200);
+  text-shadow: 0 0 8px rgba(216, 180, 254, 0.5);
 }
 
 /* ============================================================
@@ -1692,16 +1714,8 @@ body::after {
     align-items: flex-start;
     padding-top: 20px;
   }
-
-  .app {
-    padding: 20px 16px 16px;
-  }
-
-  .logo {
-    font-size: 18px;
-    letter-spacing: 3.5px;
-  }
-
+  .app { padding: 20px 16px 16px; }
+  .logo { font-size: 18px; letter-spacing: 3.5px; }
   .card { padding: 14px 16px; }
   .card-icon { width: 34px; height: 34px; }
   .stats { gap: 6px; }
@@ -1733,7 +1747,7 @@ body::after {
 <div class="particles" id="particles"></div>
 
 <div class="app" id="app">
-  <!-- ================= HEADER ================= -->
+  <!-- HEADER -->
   <header class="header">
     <div class="brand">
       <div class="logo-dot"></div>
@@ -1741,13 +1755,11 @@ body::after {
     </div>
     <div class="header-right">
       <div class="status-led"></div>
-      <div class="badge">v4.0</div>
+      <div class="badge">v4.1</div>
     </div>
   </header>
 
-  <!-- ============================================================
-       VIEW 1: KEY INPUT
-       ============================================================ -->
+  <!-- VIEW 1: KEY INPUT -->
   <div class="view active" id="view-key">
     <div class="key-view">
       <div class="key-icon">🔑</div>
@@ -1763,6 +1775,8 @@ body::after {
           placeholder="XXXX-XXXX-XXXXX"
           autocomplete="off"
           spellcheck="false"
+          autocorrect="off"
+          autocapitalize="off"
           maxlength="30"
         >
       </div>
@@ -1776,12 +1790,9 @@ body::after {
     </div>
   </div>
 
-  <!-- ============================================================
-       VIEW 2: MAIN PANEL
-       ============================================================ -->
+  <!-- VIEW 2: MAIN PANEL -->
   <div class="view" id="view-main">
-
-    <!-- Key info panel -->
+    <!-- Key info -->
     <div class="key-info">
       <div class="key-info-header">
         <div class="key-info-title">
@@ -1825,7 +1836,7 @@ body::after {
     <!-- Tab content -->
     <div class="tab-content">
 
-      <!-- ===== TAB: MENU ===== -->
+      <!-- TAB: MENU -->
       <div class="tab-panel active" data-panel="menu">
         <div class="connection-bar">
           <div class="conn-left">
@@ -1905,7 +1916,7 @@ body::after {
         </footer>
       </div>
 
-      <!-- ===== TAB: DNS ===== -->
+      <!-- TAB: DNS -->
       <div class="tab-panel" data-panel="dns">
         <div class="connection-bar">
           <div class="conn-left">
@@ -1937,7 +1948,6 @@ body::after {
           </div>
         </section>
 
-        <!-- Steps -->
         <div class="steps">
           <div class="steps-title">
             <span class="icon">✦</span>
@@ -1961,7 +1971,6 @@ body::after {
           </div>
         </div>
 
-        <!-- Download DNS -->
         <div class="download-section">
           <button class="download-btn" id="download-dns">
             <span class="download-icon">⬇</span>
@@ -1985,7 +1994,6 @@ body::after {
           </div>
         </div>
 
-        <!-- DNS Stats -->
         <div class="stats">
           <div class="stat">
             <div class="stat-label">Status</div>
@@ -2008,9 +2016,7 @@ body::after {
       </div>
 
     </div>
-    <!-- /tab-content -->
 
-    <!-- Global log -->
     <div class="log-panel" id="log-panel">
       <div class="log-title">
         <span>System Log</span>
@@ -2019,10 +2025,8 @@ body::after {
       <div id="log-body"></div>
     </div>
   </div>
-  <!-- /view-main -->
 </div>
 
-<!-- ================= TOAST ================= -->
 <div class="toast" id="toast">
   <span class="icon">▸</span>
   <span class="toast-text" id="toast-text">Ready</span>
@@ -2030,13 +2034,121 @@ body::after {
 
 <script>
 /* ============================================================
-   ZXOVA v4.0 — LOGIC
+   ZXOVA v4.1 — LOGIC + ANTI-ZOOM
    ============================================================ */
 
 (function () {
   'use strict';
 
-  /* ---------- Constants ---------- */
+  /* ============================================================
+     ANTI-ZOOM PROTECTION
+     ============================================================ */
+
+  // 1. Disable pinch-zoom (touch events)
+  document.addEventListener('touchstart', function (e) {
+    if (e.touches.length > 1) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  document.addEventListener('touchmove', function (e) {
+    if (e.touches.length > 1) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  // 2. Disable double-tap zoom
+  let lastTouchEnd = 0;
+  document.addEventListener('touchend', function (e) {
+    const now = Date.now();
+    if (now - lastTouchEnd <= 300) {
+      e.preventDefault();
+    }
+    lastTouchEnd = now;
+  }, { passive: false });
+
+  // 3. Disable Ctrl + wheel zoom (desktop)
+  document.addEventListener('wheel', function (e) {
+    if (e.ctrlKey) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  // 4. Disable Ctrl + "+" / "-" / "0" keyboard zoom
+  document.addEventListener('keydown', function (e) {
+    if ((e.ctrlKey || e.metaKey) && (
+      e.key === '+' || e.key === '-' || e.key === '=' ||
+      e.key === '0' || e.keyCode === 187 || e.keyCode === 189 ||
+      e.keyCode === 48
+    )) {
+      e.preventDefault();
+    }
+  });
+
+  // 5. Disable gesturestart (iOS Safari)
+  document.addEventListener('gesturestart', function (e) {
+    e.preventDefault();
+  });
+  document.addEventListener('gesturechange', function (e) {
+    e.preventDefault();
+  });
+  document.addEventListener('gestureend', function (e) {
+    e.preventDefault();
+  });
+
+  // 6. Force reset viewport scale on load (iOS)
+  function resetViewportScale() {
+    const vp = document.querySelector('meta[name="viewport"]');
+    if (vp) {
+      vp.setAttribute(
+        'content',
+        'width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover'
+      );
+    }
+  }
+  window.addEventListener('load', resetViewportScale);
+
+  // 7. Detect and block zoom via visualViewport (modern)
+  if (window.visualViewport) {
+    let initialScale = window.visualViewport.scale;
+    window.visualViewport.addEventListener('resize', function () {
+      if (window.visualViewport.scale !== initialScale) {
+        // Force scale back to 1 (browser may ignore, but try)
+        document.documentElement.style.transform = 'scale(1)';
+        document.documentElement.style.transformOrigin = '0 0';
+        setTimeout(() => {
+          document.documentElement.style.transform = '';
+        }, 50);
+      }
+    });
+  }
+
+  // 8. Disable iOS rubber-band scroll bounce
+  document.addEventListener('touchmove', function (e) {
+    // Allow scroll inside scrollable elements
+    if (e.target.closest('.log-panel')) return;
+    // Block pull-to-refresh
+    if (window.scrollY <= 0 && e.touches[0].clientY > 0) {
+      // Let it be, but block pinch
+    }
+  }, { passive: true });
+
+  // 9. Disable right-click context menu (optional)
+  document.addEventListener('contextmenu', function (e) {
+    // Allow on input for paste
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    e.preventDefault();
+  });
+
+  // 10. Disable image drag
+  document.addEventListener('dragstart', function (e) {
+    if (e.target.tagName === 'IMG') e.preventDefault();
+  });
+
+  /* ============================================================
+     APP LOGIC
+     ============================================================ */
+
   const VALID_KEY = 'Zin-Xc4a-gDE49';
   const DEFAULT_INFO = {
     duration: 'Vĩnh Viễn',
@@ -2044,7 +2156,6 @@ body::after {
     code: '4DCJ592TY'
   };
 
-  /* ---------- State ---------- */
   const state = {
     authed: false,
     activeMenu: null,
@@ -2060,7 +2171,6 @@ body::after {
     dns:  'DNS BOOSTER'
   };
 
-  /* ---------- DOM Cache ---------- */
   const els = {
     viewKey: document.getElementById('view-key'),
     viewMain: document.getElementById('view-main'),
@@ -2121,7 +2231,6 @@ body::after {
 
   let toastTimer = null;
 
-  /* ---------- Utils ---------- */
   const pad = n => String(n).padStart(2, '0');
 
   function timeString() {
@@ -2138,7 +2247,6 @@ body::after {
     return Math.floor(Math.random() * 45) + 12;
   }
 
-  /* ---------- Toast ---------- */
   function showToast(message, type) {
     els.toastText.textContent = message;
     els.toast.className = 'toast';
@@ -2167,7 +2275,6 @@ body::after {
     toastTimer = setTimeout(() => els.toast.classList.remove('show'), 1900);
   }
 
-  /* ---------- Ripple ---------- */
   function createRipple(target, color) {
     const rect = target.getBoundingClientRect();
     const ripple = document.createElement('span');
@@ -2183,7 +2290,6 @@ body::after {
     setTimeout(() => ripple.remove(), 750);
   }
 
-  /* ---------- Log ---------- */
   function addLog(tag, message) {
     const line = document.createElement('div');
     line.className = 'log-line';
@@ -2209,7 +2315,6 @@ body::after {
     }
   }
 
-  /* ---------- Particles ---------- */
   function spawnParticles(count) {
     for (let i = 0; i < count; i++) {
       const p = document.createElement('div');
@@ -2225,9 +2330,7 @@ body::after {
     }
   }
 
-  /* ============================================================
-     AUTH
-     ============================================================ */
+  /* ---------- AUTH ---------- */
   function submitKey() {
     const value = els.keyInput.value.trim();
     els.keyError.classList.remove('show');
@@ -2244,16 +2347,13 @@ body::after {
     els.keySubmit.classList.add('loading');
     els.keySubmit.textContent = 'Đang kiểm tra';
 
-    // Simulate network delay
     setTimeout(() => {
       if (value === VALID_KEY) {
         els.keyInput.classList.add('success');
         els.keyError.classList.remove('show');
         addLog('ok', 'Key verified → access granted');
 
-        setTimeout(() => {
-          loginSuccess();
-        }, 500);
+        setTimeout(() => loginSuccess(), 500);
       } else {
         els.keySubmit.classList.remove('loading');
         els.keySubmit.textContent = 'Xác nhận';
@@ -2262,8 +2362,6 @@ body::after {
         els.keyError.classList.add('show');
         addLog('err', 'Invalid key attempt: ' + value.substring(0, 12) + '...');
         showToast('KEY INVALID', 'error');
-
-        // Re-focus + select
         setTimeout(() => els.keyInput.select(), 400);
       }
     }, 900);
@@ -2273,12 +2371,10 @@ body::after {
     state.authed = true;
     state.startTime = Date.now();
 
-    // Fill info
     els.infoDuration.textContent = DEFAULT_INFO.duration;
     els.infoDevice.textContent = DEFAULT_INFO.device;
     els.infoCode.textContent = DEFAULT_INFO.code;
 
-    // Switch view
     els.viewKey.classList.remove('active');
     els.viewMain.classList.add('active');
 
@@ -2294,16 +2390,13 @@ body::after {
     renderDns();
   }
 
-  /* ---------- Copy code ---------- */
   els.copyCode.addEventListener('click', () => {
     const code = DEFAULT_INFO.code;
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(code).then(() => {
         showToast('COPIED: ' + code, 'success');
         addLog('info', 'Access code copied');
-      }).catch(() => {
-        fallbackCopy(code);
-      });
+      }).catch(() => fallbackCopy(code));
     } else {
       fallbackCopy(code);
     }
@@ -2326,9 +2419,7 @@ body::after {
     ta.remove();
   }
 
-  /* ============================================================
-     MENU RENDER
-     ============================================================ */
+  /* ---------- RENDER ---------- */
   function renderMenu() {
     MENU_MODULES.forEach(key => {
       const el = els[key];
@@ -2355,9 +2446,6 @@ body::after {
       : 'NONE';
   }
 
-  /* ============================================================
-     DNS RENDER
-     ============================================================ */
   function renderDns() {
     const el = els.dns;
     const isActive = state.dns;
@@ -2390,9 +2478,7 @@ body::after {
       : '0 0 6px var(--text-4)';
   }
 
-  /* ============================================================
-     TOGGLES
-     ============================================================ */
+  /* ---------- TOGGLES ---------- */
   function handleMenuToggle(key) {
     const isCurrentlyActive = state.activeMenu === key;
 
@@ -2437,11 +2523,8 @@ body::after {
     renderDns();
   }
 
-  /* ============================================================
-     DOWNLOAD DNS (.mobileconfig)
-     ============================================================ */
+  /* ---------- DOWNLOAD DNS ---------- */
   function buildMobileConfig() {
-    // UUID generator
     const uuid = () =>
       'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
         const r = Math.random() * 16 | 0;
@@ -2545,9 +2628,7 @@ body::after {
     }, 700);
   }
 
-  /* ============================================================
-     TABS
-     ============================================================ */
+  /* ---------- TABS ---------- */
   function switchTab(tabName) {
     els.tabs.forEach(btn => {
       btn.classList.toggle('active', btn.dataset.tab === tabName);
@@ -2562,9 +2643,7 @@ body::after {
     addLog('info', 'Tab switched → ' + tabName.toUpperCase());
   }
 
-  /* ============================================================
-     TICKERS
-     ============================================================ */
+  /* ---------- TICKERS ---------- */
   setInterval(() => {
     if (state.authed) {
       els.statUptime.textContent = uptimeString();
@@ -2582,9 +2661,7 @@ body::after {
     }
   }, 3000);
 
-  /* ============================================================
-     EVENT BINDINGS
-     ============================================================ */
+  /* ---------- EVENT BINDINGS ---------- */
   els.keySubmit.addEventListener('click', submitKey);
 
   els.keyInput.addEventListener('keydown', (e) => {
@@ -2613,7 +2690,6 @@ body::after {
     showToast('LOG CLEARED', 'off');
   });
 
-  // Keyboard shortcuts
   document.addEventListener('keydown', (e) => {
     if (e.target.tagName === 'INPUT') return;
     if (!state.authed) return;
@@ -2637,17 +2713,14 @@ body::after {
     }
   });
 
-  /* ============================================================
-     INIT
-     ============================================================ */
+  /* ---------- INIT ---------- */
   function init() {
     spawnParticles(20);
-
-    // Auto-fill hint (không tự điền, chỉ placeholder)
     els.keyInput.placeholder = 'XXXX-XXXX-XXXXX';
     els.keyInput.focus();
 
-    addLog('info', 'ZXOVA v4.0 booting...');
+    addLog('info', 'ZXOVA v4.1 booting...');
+    addLog('info', 'Anti-zoom protection: ACTIVE');
     addLog('info', 'Waiting for authentication');
   }
 
