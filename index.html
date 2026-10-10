@@ -1,0 +1,2659 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZXOVA — Control Panel v4</title>
+<style>
+/* ============================================================
+   ZXOVA CONTROL PANEL v4.0
+   - Auth: key input
+   - Tabs: MENU / DNS
+   - DNS: toggle + download .mobileconfig
+   ============================================================ */
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  height: 100%;
+  overflow-x: hidden;
+}
+
+:root {
+  --bg-0: #1a0f2e;
+  --bg-1: #221442;
+  --bg-2: #2b1a52;
+  --bg-3: #35216a;
+  --bg-4: #3f2780;
+  --bg-5: #4a2e94;
+
+  --border-0: #3d2478;
+  --border-1: #4d2f96;
+  --border-2: #5e3ab0;
+
+  --purple-100: #f3e8ff;
+  --purple-200: #e9d5ff;
+  --purple-300: #d8b4fe;
+  --purple-400: #c084fc;
+  --purple-500: #a855f7;
+  --purple-600: #9333ea;
+  --purple-700: #7e3fd1;
+  --purple-800: #6b21a8;
+
+  --text-0: #ffffff;
+  --text-1: #f3e8ff;
+  --text-2: #d8b4fe;
+  --text-3: #b794d9;
+  --text-4: #9b7fbf;
+  --text-5: #8b6fb5;
+
+  --off: #6b5585;
+  --on: #a855f7;
+  --success: #4ade80;
+  --success-bright: #86efac;
+  --warning: #fbbf24;
+  --error: #f87171;
+  --info: #60a5fa;
+
+  --glow-sm: 0 0 8px rgba(192, 132, 252, 0.5);
+  --glow-md: 0 0 16px rgba(192, 132, 252, 0.6);
+  --glow-lg: 0 0 28px rgba(192, 132, 252, 0.7);
+  --glow-xl: 0 0 48px rgba(192, 132, 252, 0.5);
+
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 18px;
+
+  --t-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --t-med: 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  --t-slow: 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  --t-bounce: 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+body {
+  font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', Consolas, monospace;
+  background: var(--bg-1);
+  color: var(--text-1);
+  font-size: 14px;
+  line-height: 1.5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+  background-image:
+    radial-gradient(circle at 15% 8%, rgba(168, 85, 247, 0.25) 0%, transparent 45%),
+    radial-gradient(circle at 85% 92%, rgba(147, 51, 234, 0.25) 0%, transparent 45%),
+    radial-gradient(circle at 50% 50%, rgba(192, 132, 252, 0.08) 0%, transparent 70%);
+  background-attachment: fixed;
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: -50%;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(168, 85, 247, 0.15) 0%, transparent 35%),
+    radial-gradient(circle at 80% 70%, rgba(192, 132, 252, 0.15) 0%, transparent 35%),
+    radial-gradient(circle at 50% 50%, rgba(147, 51, 234, 0.10) 0%, transparent 40%);
+  animation: auroraMove 20s ease-in-out infinite;
+  filter: blur(40px);
+}
+
+@keyframes auroraMove {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%      { transform: translate(6%, -6%) scale(1.1); }
+  66%      { transform: translate(-6%, 6%) scale(0.95); }
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.03;
+  z-index: 1;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Floating particles */
+.particles {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--purple-300);
+  box-shadow: 0 0 8px var(--purple-300);
+  opacity: 0;
+  animation: floatUp linear infinite;
+}
+
+@keyframes floatUp {
+  0% {
+    opacity: 0;
+    transform: translateY(100vh) scale(0.5);
+  }
+  10% { opacity: 0.7; }
+  90% { opacity: 0.7; }
+  100% {
+    opacity: 0;
+    transform: translateY(-10vh) scale(1.2);
+  }
+}
+
+/* ============================================================
+   APP
+   ============================================================ */
+.app {
+  width: 100%;
+  max-width: 460px;
+  background: linear-gradient(160deg, var(--bg-3) 0%, var(--bg-2) 100%);
+  border: 1px solid var(--border-1);
+  border-radius: var(--r-xl);
+  padding: 24px 20px 20px;
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, 0.5),
+    0 0 80px rgba(168, 85, 247, 0.20),
+    0 0 0 1px rgba(192, 132, 252, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  position: relative;
+  z-index: 3;
+  overflow: hidden;
+  animation: appEnter 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes appEnter {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.app::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(216, 180, 254, 0.95), transparent);
+  opacity: 0.9;
+}
+
+.app::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 100px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--purple-300), transparent);
+  filter: blur(2px);
+  animation: topGlow 4s ease-in-out infinite;
+}
+
+@keyframes topGlow {
+  0%, 100% { left: -100px; opacity: 0; }
+  50%      { left: calc(100% - 100px); opacity: 1; }
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-0);
+  position: relative;
+}
+
+.header::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 70px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--purple-400), transparent);
+  box-shadow: 0 0 10px var(--purple-400);
+  animation: headerSweep 3s ease-in-out infinite;
+}
+
+@keyframes headerSweep {
+  0%, 100% { width: 70px; opacity: 0.7; }
+  50%      { width: 140px; opacity: 1; }
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--purple-400);
+  box-shadow: 0 0 14px rgba(192, 132, 252, 0.9);
+  position: relative;
+  animation: pulse 2.4s ease-in-out infinite;
+}
+
+.logo-dot::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 1px solid var(--purple-400);
+  opacity: 0.5;
+  animation: ringPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.65; transform: scale(0.92); }
+}
+
+@keyframes ringPulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50%      { transform: scale(1.5); opacity: 0; }
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: var(--text-0);
+  text-shadow: 0 0 20px rgba(192, 132, 252, 0.8);
+  user-select: none;
+}
+
+.logo .accent {
+  color: var(--purple-300);
+  text-shadow: 0 0 16px rgba(216, 180, 254, 1);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badge {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: var(--text-2);
+  border: 1px solid var(--border-1);
+  padding: 4px 8px;
+  border-radius: var(--r-sm);
+  background: rgba(168, 85, 247, 0.12);
+  font-weight: 600;
+}
+
+.status-led {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 10px var(--success);
+  animation: ledBlink 1.8s ease-in-out infinite;
+}
+
+@keyframes ledBlink {
+  0%, 100% { opacity: 1; box-shadow: 0 0 10px var(--success); }
+  50%      { opacity: 0.4; box-shadow: 0 0 4px var(--success); }
+}
+
+/* ============================================================
+   VIEWS
+   ============================================================ */
+.view {
+  display: none;
+}
+
+.view.active {
+  display: block;
+  animation: viewEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes viewEnter {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   KEY INPUT VIEW
+   ============================================================ */
+.key-view {
+  text-align: center;
+  padding: 12px 0 4px;
+}
+
+.key-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.35) 0%, rgba(168, 85, 247, 0.08) 70%);
+  border: 1px solid rgba(192, 132, 252, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  color: var(--purple-200);
+  box-shadow:
+    0 0 32px rgba(192, 132, 252, 0.5),
+    inset 0 0 20px rgba(192, 132, 252, 0.2);
+  position: relative;
+  animation: keyIconFloat 3s ease-in-out infinite;
+}
+
+@keyframes keyIconFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+
+.key-icon::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 1px solid rgba(192, 132, 252, 0.35);
+  animation: ringPulse 2.5s ease-in-out infinite;
+}
+
+.key-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--text-0);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  text-shadow: 0 0 20px rgba(192, 132, 252, 0.6);
+}
+
+.key-subtitle {
+  font-size: 11px;
+  letter-spacing: 1.2px;
+  color: var(--text-3);
+  margin-bottom: 26px;
+}
+
+.key-input-wrap {
+  position: relative;
+  margin-bottom: 14px;
+  text-align: left;
+}
+
+.key-input-label {
+  font-size: 9.5px;
+  letter-spacing: 2px;
+  color: var(--text-4);
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: block;
+  padding-left: 2px;
+}
+
+.key-input {
+  width: 100%;
+  background: rgba(26, 15, 46, 0.7);
+  border: 1px solid var(--border-1);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+  font-family: inherit;
+  font-size: 14px;
+  letter-spacing: 1.5px;
+  color: var(--text-0);
+  outline: none;
+  transition: border-color var(--t-med), box-shadow var(--t-med), background var(--t-med);
+  text-align: center;
+  font-weight: 600;
+}
+
+.key-input::placeholder {
+  color: var(--text-5);
+  letter-spacing: 1px;
+  font-weight: 500;
+}
+
+.key-input:focus {
+  border-color: var(--purple-400);
+  background: rgba(26, 15, 46, 0.9);
+  box-shadow:
+    0 0 0 3px rgba(168, 85, 247, 0.15),
+    0 0 20px rgba(192, 132, 252, 0.4);
+}
+
+.key-input.error {
+  border-color: var(--error);
+  box-shadow:
+    0 0 0 3px rgba(248, 113, 113, 0.15),
+    0 0 20px rgba(248, 113, 113, 0.4);
+  animation: shake 0.4s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%      { transform: translateX(-8px); }
+  40%      { transform: translateX(8px); }
+  60%      { transform: translateX(-5px); }
+  80%      { transform: translateX(5px); }
+}
+
+.key-input.success {
+  border-color: var(--success-bright);
+  box-shadow:
+    0 0 0 3px rgba(134, 239, 172, 0.15),
+    0 0 20px rgba(134, 239, 172, 0.5);
+}
+
+.key-btn {
+  width: 100%;
+  background: linear-gradient(135deg, var(--purple-500), var(--purple-600));
+  border: 1px solid var(--purple-400);
+  border-radius: var(--r-md);
+  padding: 14px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #fff;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all var(--t-med);
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 4px 20px rgba(168, 85, 247, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.key-btn:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 8px 30px rgba(168, 85, 247, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.key-btn:active {
+  transform: translateY(0) scale(0.985);
+}
+
+.key-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transition: left 0.6s;
+}
+
+.key-btn:hover::before {
+  left: 100%;
+}
+
+.key-btn.loading {
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.key-btn.loading::after {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  margin-left: 8px;
+  vertical-align: middle;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.key-error-msg {
+  font-size: 11px;
+  color: var(--error);
+  letter-spacing: 0.8px;
+  margin-top: 10px;
+  min-height: 16px;
+  opacity: 0;
+  transition: opacity var(--t-med);
+  font-weight: 600;
+}
+
+.key-error-msg.show {
+  opacity: 1;
+  animation: shake 0.4s ease-in-out;
+}
+
+.key-hint {
+  font-size: 10px;
+  color: var(--text-4);
+  letter-spacing: 0.8px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border-0);
+}
+
+.key-hint strong {
+  color: var(--purple-300);
+  font-weight: 700;
+}
+
+/* ============================================================
+   KEY INFO PANEL (after login)
+   ============================================================ */
+.key-info {
+  background: rgba(168, 85, 247, 0.10);
+  border: 1px solid var(--border-1);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.key-info::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(216, 180, 254, 0.15), transparent);
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 200%; }
+}
+
+.key-info-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-0);
+}
+
+.key-info-title {
+  font-size: 9.5px;
+  letter-spacing: 2px;
+  color: var(--text-2);
+  text-transform: uppercase;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.key-info-title .shield {
+  color: var(--success-bright);
+  font-size: 11px;
+}
+
+.key-info-badge {
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: var(--success-bright);
+  background: rgba(74, 222, 128, 0.15);
+  border: 1px solid rgba(74, 222, 128, 0.4);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.key-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 14px;
+}
+
+.key-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.key-info-item.full {
+  grid-column: 1 / -1;
+}
+
+.key-info-label {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: var(--text-4);
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.key-info-value {
+  font-size: 12px;
+  color: var(--text-0);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  word-break: break-all;
+  font-variant-numeric: tabular-nums;
+}
+
+.key-info-value.purple {
+  color: var(--purple-200);
+  text-shadow: 0 0 10px rgba(216, 180, 254, 0.6);
+}
+
+.key-info-value.green {
+  color: var(--success-bright);
+  text-shadow: 0 0 10px rgba(134, 239, 172, 0.6);
+}
+
+.copy-btn {
+  background: none;
+  border: none;
+  color: var(--text-4);
+  font-family: inherit;
+  font-size: 9px;
+  letter-spacing: 0.8px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all var(--t-fast);
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.copy-btn:hover {
+  color: var(--purple-200);
+  background: rgba(168, 85, 247, 0.18);
+}
+
+/* ============================================================
+   TABS
+   ============================================================ */
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  background: rgba(26, 15, 46, 0.6);
+  border: 1px solid var(--border-0);
+  border-radius: var(--r-md);
+  padding: 5px;
+  margin-bottom: 18px;
+  position: relative;
+}
+
+.tab-indicator {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  height: calc(100% - 10px);
+  width: calc(50% - 5px);
+  background: linear-gradient(135deg, var(--purple-500), var(--purple-600));
+  border-radius: var(--r-sm);
+  box-shadow:
+    0 0 20px rgba(168, 85, 247, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: transform var(--t-bounce);
+  z-index: 1;
+}
+
+.tab-indicator[data-pos="1"] {
+  transform: translateX(calc(100% + 2px));
+}
+
+.tab-btn {
+  position: relative;
+  z-index: 2;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--text-4);
+  padding: 9px 0;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: color var(--t-med);
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.tab-btn .tab-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.5;
+  transition: opacity var(--t-med), box-shadow var(--t-med);
+}
+
+.tab-btn.active {
+  color: var(--text-0);
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
+}
+
+.tab-btn.active .tab-dot {
+  opacity: 1;
+  background: #fff;
+  box-shadow: 0 0 8px #fff;
+}
+
+.tab-btn:not(.active):hover {
+  color: var(--text-2);
+}
+
+/* ============================================================
+   TAB CONTENT
+   ============================================================ */
+.tab-content {
+  position: relative;
+}
+
+.tab-panel {
+  display: none;
+}
+
+.tab-panel.active {
+  display: block;
+  animation: panelEnter 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes panelEnter {
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ============================================================
+   CONNECTION BAR
+   ============================================================ */
+.connection-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(168, 85, 247, 0.10);
+  border: 1px solid var(--border-1);
+  border-radius: var(--r-md);
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+}
+
+.connection-bar::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(216, 180, 254, 0.15), transparent);
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+.conn-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-3);
+  position: relative;
+  z-index: 1;
+}
+
+.conn-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 8px var(--success);
+  animation: pulse 1.8s ease-in-out infinite;
+}
+
+.conn-label {
+  color: var(--text-2);
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  font-weight: 600;
+  transition: color var(--t-med);
+}
+
+.conn-ping {
+  color: var(--purple-300);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 8px rgba(192, 132, 252, 0.6);
+  position: relative;
+  z-index: 1;
+}
+
+/* ============================================================
+   HINT BAR
+   ============================================================ */
+.hint-bar {
+  background: rgba(251, 191, 36, 0.10);
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  border-radius: var(--r-md);
+  padding: 9px 12px;
+  margin-bottom: 14px;
+  font-size: 10.5px;
+  letter-spacing: 0.8px;
+  color: #fde68a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.hint-bar .icon {
+  color: var(--warning);
+  font-size: 13px;
+  animation: warningBlink 1.5s ease-in-out infinite;
+}
+
+@keyframes warningBlink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.5; }
+}
+
+/* ============================================================
+   SECTION
+   ============================================================ */
+.section {
+  margin-bottom: 12px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding: 0 2px;
+}
+
+.section-label {
+  font-size: 10px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--text-2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.section-label::before {
+  content: '›';
+  color: var(--purple-300);
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.section-index {
+  font-size: 10px;
+  color: var(--text-4);
+  letter-spacing: 1px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+/* ============================================================
+   CARD
+   ============================================================ */
+.card {
+  background: rgba(168, 85, 247, 0.08);
+  border: 1px solid var(--border-0);
+  border-radius: var(--r-lg);
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  transition:
+    border-color var(--t-med),
+    box-shadow var(--t-med),
+    background var(--t-med),
+    transform var(--t-fast),
+    opacity var(--t-med);
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(216, 180, 254, 0), transparent);
+  transition: background var(--t-med);
+}
+
+.card:hover {
+  border-color: var(--border-1);
+  background: rgba(168, 85, 247, 0.12);
+}
+
+.card:active {
+  transform: scale(0.995);
+}
+
+.card.active {
+  border-color: rgba(192, 132, 252, 0.85);
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.28) 0%, rgba(147, 51, 234, 0.20) 100%);
+  box-shadow:
+    0 0 0 1px rgba(192, 132, 252, 0.35),
+    0 0 30px rgba(192, 132, 252, 0.35),
+    inset 0 1px 0 rgba(243, 232, 255, 0.15);
+  animation: cardActivePulse 2.4s ease-in-out infinite;
+}
+
+@keyframes cardActivePulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 1px rgba(192, 132, 252, 0.35),
+      0 0 30px rgba(192, 132, 252, 0.35),
+      inset 0 1px 0 rgba(243, 232, 255, 0.15);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(192, 132, 252, 0.55),
+      0 0 42px rgba(192, 132, 252, 0.5),
+      inset 0 1px 0 rgba(243, 232, 255, 0.2);
+  }
+}
+
+.card.active::before {
+  background: linear-gradient(90deg, transparent, rgba(216, 180, 254, 0.95), transparent);
+}
+
+.card.active.dns-active {
+  border-color: rgba(134, 239, 172, 0.85);
+  background: linear-gradient(135deg, rgba(74, 222, 128, 0.22) 0%, rgba(34, 197, 94, 0.16) 100%);
+  box-shadow:
+    0 0 0 1px rgba(134, 239, 172, 0.35),
+    0 0 30px rgba(74, 222, 128, 0.4),
+    inset 0 1px 0 rgba(220, 252, 231, 0.15);
+}
+
+.card.active.dns-active::before {
+  background: linear-gradient(90deg, transparent, rgba(134, 239, 172, 0.95), transparent);
+}
+
+.card.locked {
+  opacity: 0.45;
+}
+
+.card-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--r-md);
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid var(--border-0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-3);
+  letter-spacing: 0.5px;
+  transition: all var(--t-med);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-icon::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(216, 180, 254, 0.4), transparent 70%);
+  opacity: 0;
+  transition: opacity var(--t-med);
+}
+
+.card.active .card-icon::after {
+  opacity: 1;
+}
+
+.card.active .card-icon {
+  background: rgba(216, 180, 254, 0.28);
+  border-color: rgba(216, 180, 254, 0.7);
+  color: var(--text-0);
+  box-shadow: inset 0 0 14px rgba(216, 180, 254, 0.35), 0 0 14px rgba(192, 132, 252, 0.4);
+}
+
+.card.active.dns-active .card-icon {
+  background: rgba(134, 239, 172, 0.28);
+  border-color: rgba(134, 239, 172, 0.7);
+  box-shadow: inset 0 0 14px rgba(134, 239, 172, 0.35), 0 0 14px rgba(74, 222, 128, 0.5);
+}
+
+.card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.card-name {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: var(--text-0);
+  transition: color var(--t-med);
+}
+
+.card-status {
+  font-size: 10.5px;
+  letter-spacing: 1.5px;
+  color: var(--text-4);
+  transition: color var(--t-med), text-shadow var(--t-med);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+}
+
+.card-status .bullet {
+  font-size: 8px;
+  line-height: 1;
+}
+
+.card-status.on {
+  color: var(--purple-200);
+  text-shadow: 0 0 12px rgba(216, 180, 254, 0.9);
+}
+
+.card-status.on.dns-status {
+  color: var(--success-bright);
+  text-shadow: 0 0 12px rgba(134, 239, 172, 0.9);
+}
+
+.card-desc {
+  font-size: 10px;
+  color: var(--text-4);
+  letter-spacing: 0.4px;
+  margin-top: 2px;
+  font-weight: 500;
+}
+
+/* ============================================================
+   SWITCH
+   ============================================================ */
+.switch {
+  position: relative;
+  width: 54px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.slider {
+  position: absolute;
+  inset: 0;
+  background: rgba(139, 111, 181, 0.25);
+  border: 1px solid var(--border-0);
+  border-radius: 14px;
+  cursor: pointer;
+  transition:
+    background var(--t-med),
+    border-color var(--t-med),
+    box-shadow var(--t-med);
+}
+
+.slider::before {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  left: 3px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--text-4);
+  border-radius: 50%;
+  transition:
+    transform var(--t-med),
+    background var(--t-med),
+    box-shadow var(--t-med);
+}
+
+.slider:hover {
+  border-color: var(--border-1);
+}
+
+.switch input:focus-visible + .slider {
+  outline: 2px solid var(--purple-400);
+  outline-offset: 3px;
+}
+
+.switch input:checked + .slider {
+  background: linear-gradient(90deg, rgba(168, 85, 247, 0.5), rgba(192, 132, 252, 0.5));
+  border-color: var(--purple-400);
+  box-shadow:
+    0 0 22px rgba(192, 132, 252, 0.7),
+    inset 0 0 12px rgba(216, 180, 254, 0.35);
+}
+
+.switch input:checked + .slider::before {
+  transform: translateY(-50%) translateX(26px);
+  background: #ffffff;
+  box-shadow: 0 0 16px rgba(255, 255, 255, 1);
+}
+
+.switch.dns input:checked + .slider {
+  background: linear-gradient(90deg, rgba(74, 222, 128, 0.6), rgba(134, 239, 172, 0.6));
+  border-color: var(--success-bright);
+  box-shadow:
+    0 0 22px rgba(74, 222, 128, 0.7),
+    inset 0 0 12px rgba(134, 239, 172, 0.35);
+}
+
+/* ============================================================
+   STATS
+   ============================================================ */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 16px;
+  margin-bottom: 14px;
+}
+
+.stat {
+  background: rgba(168, 85, 247, 0.10);
+  border: 1px solid var(--border-0);
+  border-radius: var(--r-md);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  transition: border-color var(--t-med), background var(--t-med), transform var(--t-fast);
+}
+
+.stat:hover {
+  border-color: var(--border-1);
+  background: rgba(168, 85, 247, 0.15);
+  transform: translateY(-1px);
+}
+
+.stat-label {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: var(--text-4);
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.stat-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-0);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.5px;
+}
+
+.stat-value.accent {
+  color: var(--purple-300);
+  text-shadow: 0 0 12px rgba(216, 180, 254, 0.8);
+}
+
+/* ============================================================
+   STEPS GUIDE
+   ============================================================ */
+.steps {
+  background: rgba(26, 15, 46, 0.6);
+  border: 1px solid var(--border-0);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.steps::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--purple-400), var(--purple-600), var(--purple-400));
+  box-shadow: 0 0 12px var(--purple-400);
+}
+
+.steps-title {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-2);
+  font-weight: 700;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.steps-title .icon {
+  color: var(--purple-300);
+  font-size: 12px;
+}
+
+.step {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 0;
+  position: relative;
+  opacity: 0;
+  animation: stepIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.step:nth-child(2) { animation-delay: 0.05s; }
+.step:nth-child(3) { animation-delay: 0.10s; }
+.step:nth-child(4) { animation-delay: 0.15s; }
+.step:nth-child(5) { animation-delay: 0.20s; }
+
+@keyframes stepIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 13px;
+  top: 32px;
+  bottom: -4px;
+  width: 1px;
+  background: linear-gradient(180deg, var(--border-1), transparent);
+}
+
+.step-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid var(--border-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--purple-300);
+  flex-shrink: 0;
+  transition: all var(--t-med);
+  position: relative;
+  z-index: 1;
+}
+
+.step:hover .step-num {
+  background: rgba(168, 85, 247, 0.35);
+  border-color: var(--purple-400);
+  color: #fff;
+  box-shadow: 0 0 14px rgba(192, 132, 252, 0.7);
+  transform: scale(1.1);
+}
+
+.step-text {
+  font-size: 11.5px;
+  color: var(--text-2);
+  line-height: 1.6;
+  padding-top: 3px;
+  letter-spacing: 0.3px;
+  font-weight: 500;
+}
+
+.step-text strong {
+  color: var(--purple-200);
+  font-weight: 700;
+}
+
+/* ============================================================
+   DOWNLOAD DNS BUTTON
+   ============================================================ */
+.download-section {
+  margin-bottom: 14px;
+}
+
+.download-btn {
+  width: 100%;
+  background: linear-gradient(135deg, rgba(74, 222, 128, 0.22), rgba(34, 197, 94, 0.18));
+  border: 1px solid var(--success-bright);
+  border-radius: var(--r-lg);
+  padding: 15px 18px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--success-bright);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all var(--t-med);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  box-shadow:
+    0 4px 20px rgba(74, 222, 128, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.download-btn:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, rgba(74, 222, 128, 0.35), rgba(34, 197, 94, 0.28));
+  box-shadow:
+    0 8px 32px rgba(74, 222, 128, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  text-shadow: 0 0 12px rgba(134, 239, 172, 0.8);
+}
+
+.download-btn:active {
+  transform: translateY(0) scale(0.985);
+}
+
+.download-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(134, 239, 172, 0.35), transparent);
+  transition: left 0.7s;
+}
+
+.download-btn:hover::before {
+  left: 100%;
+}
+
+.download-icon {
+  font-size: 16px;
+  display: inline-block;
+  animation: downloadBounce 1.8s ease-in-out infinite;
+}
+
+@keyframes downloadBounce {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(3px); }
+}
+
+.download-btn.downloading {
+  pointer-events: none;
+}
+
+.download-btn.downloading .download-icon {
+  animation: spin 0.7s linear infinite;
+}
+
+/* Info panel for download */
+.download-info {
+  background: rgba(74, 222, 128, 0.08);
+  border: 1px solid rgba(74, 222, 128, 0.3);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+  margin-top: 12px;
+  font-size: 10.5px;
+  position: relative;
+  overflow: hidden;
+}
+
+.download-info-title {
+  font-size: 9.5px;
+  letter-spacing: 1.5px;
+  color: var(--success-bright);
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.download-info-title::before {
+  content: '●';
+  font-size: 7px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.download-info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  border-bottom: 1px dashed rgba(74, 222, 128, 0.15);
+}
+
+.download-info-row:last-child {
+  border-bottom: none;
+}
+
+.download-info-label {
+  color: var(--text-3);
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.download-info-value {
+  color: var(--text-0);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-align: right;
+}
+
+.download-info-value.green {
+  color: var(--success-bright);
+  text-shadow: 0 0 8px rgba(134, 239, 172, 0.5);
+}
+
+/* ============================================================
+   LOG PANEL
+   ============================================================ */
+.log-panel {
+  background: rgba(26, 15, 46, 0.85);
+  border: 1px solid var(--border-0);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+  margin-top: 14px;
+  font-size: 10.5px;
+  height: 86px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-1) transparent;
+  position: relative;
+}
+
+.log-panel::-webkit-scrollbar { width: 5px; }
+.log-panel::-webkit-scrollbar-track { background: transparent; }
+.log-panel::-webkit-scrollbar-thumb {
+  background: var(--border-1);
+  border-radius: 3px;
+}
+.log-panel::-webkit-scrollbar-thumb:hover {
+  background: var(--purple-600);
+}
+
+.log-title {
+  position: sticky;
+  top: -12px;
+  background: rgba(26, 15, 46, 0.95);
+  padding: 0 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: var(--text-4);
+  text-transform: uppercase;
+  font-weight: 700;
+  z-index: 1;
+}
+
+.log-title .clear-btn {
+  background: none;
+  border: none;
+  color: var(--text-4);
+  font-family: inherit;
+  font-size: 9px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all var(--t-fast);
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.log-title .clear-btn:hover {
+  color: var(--purple-200);
+  background: rgba(168, 85, 247, 0.18);
+}
+
+.log-line {
+  display: flex;
+  gap: 8px;
+  padding: 2px 0;
+  animation: logIn 0.3s ease-out;
+  line-height: 1.5;
+}
+
+@keyframes logIn {
+  from { opacity: 0; transform: translateX(-6px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.log-time {
+  color: var(--text-4);
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.log-tag {
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+.log-tag.info { color: var(--purple-300); }
+.log-tag.ok   { color: var(--success); }
+.log-tag.warn { color: var(--warning); }
+.log-tag.err  { color: var(--error); }
+
+.log-msg {
+  color: var(--text-2);
+  word-break: break-word;
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.footer {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-0);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10px;
+  letter-spacing: 1.2px;
+  color: var(--text-4);
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.footer .count {
+  color: var(--purple-300);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 10px rgba(216, 180, 254, 0.7);
+  transition: color var(--t-med), text-shadow var(--t-med);
+}
+
+.footer .count.dns {
+  color: var(--success-bright);
+  text-shadow: 0 0 10px rgba(134, 239, 172, 0.7);
+}
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(90px);
+  background: linear-gradient(135deg, var(--bg-4), var(--bg-3));
+  border: 1px solid var(--purple-400);
+  color: var(--text-0);
+  font-size: 11.5px;
+  letter-spacing: 1px;
+  padding: 10px 20px;
+  border-radius: var(--r-md);
+  box-shadow:
+    0 0 28px rgba(192, 132, 252, 0.7),
+    0 12px 40px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transition: transform var(--t-slow), opacity var(--t-slow);
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 100;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.toast .icon {
+  color: var(--purple-200);
+  font-size: 14px;
+}
+
+.toast.success {
+  border-color: var(--success-bright);
+  box-shadow:
+    0 0 28px rgba(74, 222, 128, 0.7),
+    0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+.toast.success .icon { color: var(--success-bright); }
+
+.toast.error {
+  border-color: var(--error);
+  box-shadow:
+    0 0 28px rgba(248, 113, 113, 0.7),
+    0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+.toast.error .icon { color: var(--error); }
+
+/* ============================================================
+   RIPPLE
+   ============================================================ */
+@keyframes ripple {
+  from { transform: scale(0.6); opacity: 1; }
+  to   { transform: scale(2.5); opacity: 0; }
+}
+
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid var(--purple-300);
+  pointer-events: none;
+  animation: ripple 0.7s ease-out forwards;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 480px) {
+  body {
+    padding: 12px;
+    align-items: flex-start;
+    padding-top: 20px;
+  }
+
+  .app {
+    padding: 20px 16px 16px;
+  }
+
+  .logo {
+    font-size: 18px;
+    letter-spacing: 3.5px;
+  }
+
+  .card { padding: 14px 16px; }
+  .card-icon { width: 34px; height: 34px; }
+  .stats { gap: 6px; }
+  .stat { padding: 9px 10px; }
+}
+
+@media (max-width: 360px) {
+  .card-icon { display: none; }
+  .logo { font-size: 16px; letter-spacing: 3px; }
+  .badge { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+::selection {
+  background: rgba(216, 180, 254, 0.5);
+  color: #fff;
+}
+</style>
+</head>
+<body>
+
+<div class="particles" id="particles"></div>
+
+<div class="app" id="app">
+  <!-- ================= HEADER ================= -->
+  <header class="header">
+    <div class="brand">
+      <div class="logo-dot"></div>
+      <div class="logo">ZX<span class="accent">OVA</span></div>
+    </div>
+    <div class="header-right">
+      <div class="status-led"></div>
+      <div class="badge">v4.0</div>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       VIEW 1: KEY INPUT
+       ============================================================ -->
+  <div class="view active" id="view-key">
+    <div class="key-view">
+      <div class="key-icon">🔑</div>
+      <div class="key-title">Nhập Key</div>
+      <div class="key-subtitle">Vui lòng nhập key để tiếp tục</div>
+
+      <div class="key-input-wrap">
+        <label class="key-input-label" for="key-input">Access Key</label>
+        <input
+          type="text"
+          class="key-input"
+          id="key-input"
+          placeholder="XXXX-XXXX-XXXXX"
+          autocomplete="off"
+          spellcheck="false"
+          maxlength="30"
+        >
+      </div>
+
+      <button class="key-btn" id="key-submit">Xác nhận</button>
+      <div class="key-error-msg" id="key-error"></div>
+
+      <div class="key-hint">
+        Liên hệ <strong>ZIN ZXOVA</strong> để nhận key
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       VIEW 2: MAIN PANEL
+       ============================================================ -->
+  <div class="view" id="view-main">
+
+    <!-- Key info panel -->
+    <div class="key-info">
+      <div class="key-info-header">
+        <div class="key-info-title">
+          <span class="shield">✓</span>
+          <span>Key đã kích hoạt</span>
+        </div>
+        <div class="key-info-badge">ACTIVE</div>
+      </div>
+      <div class="key-info-grid">
+        <div class="key-info-item">
+          <div class="key-info-label">Thời hạn</div>
+          <div class="key-info-value green" id="info-duration">Vĩnh Viễn</div>
+        </div>
+        <div class="key-info-item">
+          <div class="key-info-label">Thiết bị</div>
+          <div class="key-info-value" id="info-device">1/1</div>
+        </div>
+        <div class="key-info-item full">
+          <div class="key-info-label">Mã truy cập</div>
+          <div class="key-info-value purple">
+            <span id="info-code">4DCJ592TY</span>
+            <button class="copy-btn" id="copy-code" title="Copy">Copy</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab-indicator" id="tab-indicator" data-pos="0"></div>
+      <button class="tab-btn active" data-tab="menu">
+        <span class="tab-dot"></span>
+        MENU
+      </button>
+      <button class="tab-btn" data-tab="dns">
+        <span class="tab-dot"></span>
+        DNS
+      </button>
+    </div>
+
+    <!-- Tab content -->
+    <div class="tab-content">
+
+      <!-- ===== TAB: MENU ===== -->
+      <div class="tab-panel active" data-panel="menu">
+        <div class="connection-bar">
+          <div class="conn-left">
+            <div class="conn-dot"></div>
+            <span class="conn-label">Connected</span>
+          </div>
+          <div class="conn-ping" id="ping">-- ms</div>
+        </div>
+
+        <div class="hint-bar">
+          <span class="icon">⚠</span>
+          <span>Chỉ có thể bật 1 module tại một thời điểm</span>
+        </div>
+
+        <section class="section">
+          <div class="section-header">
+            <div class="section-label">FFTH</div>
+            <div class="section-index">[01]</div>
+          </div>
+          <div class="card" id="card-ffth">
+            <div class="card-icon">TH</div>
+            <div class="card-info">
+              <div class="card-name">MENU FFTH</div>
+              <div class="card-status" id="status-ffth">
+                <span class="bullet">●</span>
+                <span class="status-text">OFF</span>
+              </div>
+              <div class="card-desc">Free Fire TH module</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="toggle-ffth" aria-label="Toggle MENU FFTH">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-header">
+            <div class="section-label">FFM</div>
+            <div class="section-index">[02]</div>
+          </div>
+          <div class="card" id="card-ffm">
+            <div class="card-icon">FM</div>
+            <div class="card-info">
+              <div class="card-name">MENU FFM</div>
+              <div class="card-status" id="status-ffm">
+                <span class="bullet">●</span>
+                <span class="status-text">OFF</span>
+              </div>
+              <div class="card-desc">Free Fire Mobile module</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="toggle-ffm" aria-label="Toggle MENU FFM">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </section>
+
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-label">Active</div>
+            <div class="stat-value accent" id="stat-active">0</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Uptime</div>
+            <div class="stat-value" id="stat-uptime">00:00</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Events</div>
+            <div class="stat-value" id="stat-events">0</div>
+          </div>
+        </div>
+
+        <footer class="footer">
+          <span>ACTIVE MODULE</span>
+          <span class="count" id="footer-count">NONE</span>
+        </footer>
+      </div>
+
+      <!-- ===== TAB: DNS ===== -->
+      <div class="tab-panel" data-panel="dns">
+        <div class="connection-bar">
+          <div class="conn-left">
+            <div class="conn-dot" id="dns-conn-dot"></div>
+            <span class="conn-label" id="dns-conn-label">DNS Standby</span>
+          </div>
+          <div class="conn-ping" id="dns-ping">-- ms</div>
+        </div>
+
+        <section class="section">
+          <div class="section-header">
+            <div class="section-label">DNS</div>
+            <div class="section-index">[03]</div>
+          </div>
+          <div class="card dns" id="card-dns">
+            <div class="card-icon">DNS</div>
+            <div class="card-info">
+              <div class="card-name">DNS BOOSTER</div>
+              <div class="card-status dns-status" id="status-dns">
+                <span class="bullet">●</span>
+                <span class="status-text">OFF</span>
+              </div>
+              <div class="card-desc">Low-ping DNS resolver</div>
+            </div>
+            <label class="switch dns">
+              <input type="checkbox" id="toggle-dns" aria-label="Toggle DNS">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </section>
+
+        <!-- Steps -->
+        <div class="steps">
+          <div class="steps-title">
+            <span class="icon">✦</span>
+            <span>Hướng dẫn sử dụng</span>
+          </div>
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-text">Vào <strong>game</strong></div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-text">Ở <strong>sảnh</strong> bật <strong>DNS</strong> lên</div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-text">Vào <strong>trận</strong></div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-text">Thoát ra bật <strong>Menu</strong></div>
+          </div>
+        </div>
+
+        <!-- Download DNS -->
+        <div class="download-section">
+          <button class="download-btn" id="download-dns">
+            <span class="download-icon">⬇</span>
+            <span>Tải DNS</span>
+          </button>
+
+          <div class="download-info">
+            <div class="download-info-title">DNS Profile Info</div>
+            <div class="download-info-row">
+              <span class="download-info-label">Tên</span>
+              <span class="download-info-value">ZXOVA</span>
+            </div>
+            <div class="download-info-row">
+              <span class="download-info-label">Bản quyền</span>
+              <span class="download-info-value purple">ZIN ZXOVA</span>
+            </div>
+            <div class="download-info-row">
+              <span class="download-info-label">Mô tả</span>
+              <span class="download-info-value green">DNS ZXOVA ANTIBAN</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- DNS Stats -->
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-label">Status</div>
+            <div class="stat-value" id="dns-stat-status" style="color: var(--text-4); font-size: 12px;">IDLE</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Latency</div>
+            <div class="stat-value" id="dns-stat-latency">--</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Server</div>
+            <div class="stat-value" style="color: var(--purple-300); font-size: 11px;">1.1.1.1</div>
+          </div>
+        </div>
+
+        <footer class="footer">
+          <span>DNS STATE</span>
+          <span class="count dns" id="dns-footer-count">DISABLED</span>
+        </footer>
+      </div>
+
+    </div>
+    <!-- /tab-content -->
+
+    <!-- Global log -->
+    <div class="log-panel" id="log-panel">
+      <div class="log-title">
+        <span>System Log</span>
+        <button class="clear-btn" id="clear-log">Clear</button>
+      </div>
+      <div id="log-body"></div>
+    </div>
+  </div>
+  <!-- /view-main -->
+</div>
+
+<!-- ================= TOAST ================= -->
+<div class="toast" id="toast">
+  <span class="icon">▸</span>
+  <span class="toast-text" id="toast-text">Ready</span>
+</div>
+
+<script>
+/* ============================================================
+   ZXOVA v4.0 — LOGIC
+   ============================================================ */
+
+(function () {
+  'use strict';
+
+  /* ---------- Constants ---------- */
+  const VALID_KEY = 'Zin-Xc4a-gDE49';
+  const DEFAULT_INFO = {
+    duration: 'Vĩnh Viễn',
+    device: '1/1',
+    code: '4DCJ592TY'
+  };
+
+  /* ---------- State ---------- */
+  const state = {
+    authed: false,
+    activeMenu: null,
+    dns: false,
+    events: 0,
+    startTime: Date.now()
+  };
+
+  const MENU_MODULES = ['ffth', 'ffm'];
+  const MODULE_LABELS = {
+    ffth: 'MENU FFTH',
+    ffm:  'MENU FFM',
+    dns:  'DNS BOOSTER'
+  };
+
+  /* ---------- DOM Cache ---------- */
+  const els = {
+    viewKey: document.getElementById('view-key'),
+    viewMain: document.getElementById('view-main'),
+
+    keyInput: document.getElementById('key-input'),
+    keySubmit: document.getElementById('key-submit'),
+    keyError: document.getElementById('key-error'),
+
+    infoDuration: document.getElementById('info-duration'),
+    infoDevice: document.getElementById('info-device'),
+    infoCode: document.getElementById('info-code'),
+    copyCode: document.getElementById('copy-code'),
+
+    tabs: document.querySelectorAll('.tab-btn'),
+    indicator: document.getElementById('tab-indicator'),
+    panels: document.querySelectorAll('.tab-panel'),
+
+    ffth: {
+      toggle: document.getElementById('toggle-ffth'),
+      card:   document.getElementById('card-ffth'),
+      status: document.getElementById('status-ffth')
+    },
+    ffm: {
+      toggle: document.getElementById('toggle-ffm'),
+      card:   document.getElementById('card-ffm'),
+      status: document.getElementById('status-ffm')
+    },
+    dns: {
+      toggle: document.getElementById('toggle-dns'),
+      card:   document.getElementById('card-dns'),
+      status: document.getElementById('status-dns')
+    },
+
+    statActive: document.getElementById('stat-active'),
+    statUptime: document.getElementById('stat-uptime'),
+    statEvents: document.getElementById('stat-events'),
+    footerCount: document.getElementById('footer-count'),
+
+    dnsStatStatus: document.getElementById('dns-stat-status'),
+    dnsStatLatency: document.getElementById('dns-stat-latency'),
+    dnsFooterCount: document.getElementById('dns-footer-count'),
+    dnsConnDot: document.getElementById('dns-conn-dot'),
+    dnsConnLabel: document.getElementById('dns-conn-label'),
+    dnsPing: document.getElementById('dns-ping'),
+
+    downloadDns: document.getElementById('download-dns'),
+
+    logBody: document.getElementById('log-body'),
+    logPanel: document.getElementById('log-panel'),
+    clearLog: document.getElementById('clear-log'),
+
+    toast: document.getElementById('toast'),
+    toastText: document.getElementById('toast-text'),
+    ping: document.getElementById('ping'),
+
+    particles: document.getElementById('particles')
+  };
+
+  let toastTimer = null;
+
+  /* ---------- Utils ---------- */
+  const pad = n => String(n).padStart(2, '0');
+
+  function timeString() {
+    const d = new Date();
+    return pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+  }
+
+  function uptimeString() {
+    const e = Math.floor((Date.now() - state.startTime) / 1000);
+    return pad(Math.floor(e / 60)) + ':' + pad(e % 60);
+  }
+
+  function randomPing() {
+    return Math.floor(Math.random() * 45) + 12;
+  }
+
+  /* ---------- Toast ---------- */
+  function showToast(message, type) {
+    els.toastText.textContent = message;
+    els.toast.className = 'toast';
+
+    if (type === 'on') {
+      els.toast.style.borderColor = 'var(--purple-400)';
+      els.toast.style.boxShadow = '0 0 30px rgba(192, 132, 252, 0.8), 0 12px 40px rgba(0,0,0,0.5)';
+    } else if (type === 'off') {
+      els.toast.style.borderColor = 'var(--border-2)';
+      els.toast.style.boxShadow = '0 0 20px rgba(192, 132, 252, 0.4), 0 12px 40px rgba(0,0,0,0.5)';
+    } else if (type === 'success') {
+      els.toast.classList.add('success');
+      els.toast.style.borderColor = '';
+      els.toast.style.boxShadow = '';
+    } else if (type === 'error') {
+      els.toast.classList.add('error');
+      els.toast.style.borderColor = '';
+      els.toast.style.boxShadow = '';
+    } else if (type === 'warn') {
+      els.toast.style.borderColor = 'var(--warning)';
+      els.toast.style.boxShadow = '0 0 30px rgba(251, 191, 36, 0.6), 0 12px 40px rgba(0,0,0,0.5)';
+    }
+
+    requestAnimationFrame(() => els.toast.classList.add('show'));
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => els.toast.classList.remove('show'), 1900);
+  }
+
+  /* ---------- Ripple ---------- */
+  function createRipple(target, color) {
+    const rect = target.getBoundingClientRect();
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    const size = Math.max(rect.width, rect.height);
+    ripple.style.width = size + 'px';
+    ripple.style.height = size + 'px';
+    ripple.style.left = (rect.width / 2 - size / 2) + 'px';
+    ripple.style.top = (rect.height / 2 - size / 2) + 'px';
+    ripple.style.borderColor = color || 'var(--purple-300)';
+    ripple.style.position = 'absolute';
+    target.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 750);
+  }
+
+  /* ---------- Log ---------- */
+  function addLog(tag, message) {
+    const line = document.createElement('div');
+    line.className = 'log-line';
+
+    const time = document.createElement('span');
+    time.className = 'log-time';
+    time.textContent = timeString();
+
+    const tagEl = document.createElement('span');
+    tagEl.className = 'log-tag ' + tag;
+    tagEl.textContent = '[' + tag.toUpperCase() + ']';
+
+    const msg = document.createElement('span');
+    msg.className = 'log-msg';
+    msg.textContent = message;
+
+    line.append(time, tagEl, msg);
+    els.logBody.appendChild(line);
+    els.logPanel.scrollTop = els.logPanel.scrollHeight;
+
+    while (els.logBody.children.length > 100) {
+      els.logBody.removeChild(els.logBody.firstChild);
+    }
+  }
+
+  /* ---------- Particles ---------- */
+  function spawnParticles(count) {
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.style.left = Math.random() * 100 + '%';
+      p.style.animationDuration = (8 + Math.random() * 12) + 's';
+      p.style.animationDelay = (Math.random() * 8) + 's';
+      p.style.opacity = 0.3 + Math.random() * 0.5;
+      const size = 2 + Math.random() * 3;
+      p.style.width = size + 'px';
+      p.style.height = size + 'px';
+      els.particles.appendChild(p);
+    }
+  }
+
+  /* ============================================================
+     AUTH
+     ============================================================ */
+  function submitKey() {
+    const value = els.keyInput.value.trim();
+    els.keyError.classList.remove('show');
+    els.keyInput.classList.remove('error', 'success');
+
+    if (!value) {
+      els.keyInput.classList.add('error');
+      els.keyError.textContent = '⚠ Vui lòng nhập key';
+      els.keyError.classList.add('show');
+      addLog('err', 'Empty key submitted');
+      return;
+    }
+
+    els.keySubmit.classList.add('loading');
+    els.keySubmit.textContent = 'Đang kiểm tra';
+
+    // Simulate network delay
+    setTimeout(() => {
+      if (value === VALID_KEY) {
+        els.keyInput.classList.add('success');
+        els.keyError.classList.remove('show');
+        addLog('ok', 'Key verified → access granted');
+
+        setTimeout(() => {
+          loginSuccess();
+        }, 500);
+      } else {
+        els.keySubmit.classList.remove('loading');
+        els.keySubmit.textContent = 'Xác nhận';
+        els.keyInput.classList.add('error');
+        els.keyError.textContent = '✕ Key không hợp lệ';
+        els.keyError.classList.add('show');
+        addLog('err', 'Invalid key attempt: ' + value.substring(0, 12) + '...');
+        showToast('KEY INVALID', 'error');
+
+        // Re-focus + select
+        setTimeout(() => els.keyInput.select(), 400);
+      }
+    }, 900);
+  }
+
+  function loginSuccess() {
+    state.authed = true;
+    state.startTime = Date.now();
+
+    // Fill info
+    els.infoDuration.textContent = DEFAULT_INFO.duration;
+    els.infoDevice.textContent = DEFAULT_INFO.device;
+    els.infoCode.textContent = DEFAULT_INFO.code;
+
+    // Switch view
+    els.viewKey.classList.remove('active');
+    els.viewMain.classList.add('active');
+
+    addLog('info', 'Session started');
+    addLog('info', 'Thời hạn: ' + DEFAULT_INFO.duration);
+    addLog('info', 'Thiết bị: ' + DEFAULT_INFO.device);
+    addLog('info', 'Mã truy cập: ' + DEFAULT_INFO.code);
+    addLog('ok', 'Welcome to ZXOVA');
+
+    showToast('WELCOME TO ZXOVA', 'success');
+
+    renderMenu();
+    renderDns();
+  }
+
+  /* ---------- Copy code ---------- */
+  els.copyCode.addEventListener('click', () => {
+    const code = DEFAULT_INFO.code;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(code).then(() => {
+        showToast('COPIED: ' + code, 'success');
+        addLog('info', 'Access code copied');
+      }).catch(() => {
+        fallbackCopy(code);
+      });
+    } else {
+      fallbackCopy(code);
+    }
+  });
+
+  function fallbackCopy(text) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand('copy');
+      showToast('COPIED: ' + text, 'success');
+      addLog('info', 'Access code copied');
+    } catch (e) {
+      showToast('COPY FAILED', 'error');
+    }
+    ta.remove();
+  }
+
+  /* ============================================================
+     MENU RENDER
+     ============================================================ */
+  function renderMenu() {
+    MENU_MODULES.forEach(key => {
+      const el = els[key];
+      const isActive = state.activeMenu === key;
+      const isLocked = state.activeMenu !== null && state.activeMenu !== key;
+
+      el.toggle.checked = isActive;
+      el.card.classList.toggle('active', isActive);
+      el.card.classList.toggle('locked', isLocked);
+
+      const statusText = el.status.querySelector('.status-text');
+      const bullet = el.status.querySelector('.bullet');
+
+      statusText.textContent = isActive ? 'ON' : 'OFF';
+      el.status.classList.toggle('on', isActive);
+      bullet.style.color = isActive ? 'var(--purple-200)' : '';
+    });
+
+    const activeCount = state.activeMenu ? 1 : 0;
+    els.statActive.textContent = activeCount;
+    els.statEvents.textContent = state.events;
+    els.footerCount.textContent = state.activeMenu
+      ? MODULE_LABELS[state.activeMenu]
+      : 'NONE';
+  }
+
+  /* ============================================================
+     DNS RENDER
+     ============================================================ */
+  function renderDns() {
+    const el = els.dns;
+    const isActive = state.dns;
+
+    el.toggle.checked = isActive;
+    el.card.classList.toggle('active', isActive);
+    el.card.classList.toggle('dns-active', isActive);
+
+    const statusText = el.status.querySelector('.status-text');
+    const bullet = el.status.querySelector('.bullet');
+
+    statusText.textContent = isActive ? 'ON' : 'OFF';
+    el.status.classList.toggle('on', isActive);
+    bullet.style.color = isActive ? 'var(--success-bright)' : '';
+
+    els.dnsStatStatus.textContent = isActive ? 'ACTIVE' : 'IDLE';
+    els.dnsStatStatus.style.color = isActive ? 'var(--success-bright)' : 'var(--text-4)';
+    els.dnsStatStatus.style.textShadow = isActive ? '0 0 12px rgba(134, 239, 172, 0.8)' : 'none';
+
+    els.dnsStatLatency.textContent = isActive ? randomPing() + ' ms' : '--';
+    els.dnsStatLatency.style.color = isActive ? 'var(--success-bright)' : 'var(--text-0)';
+
+    els.dnsFooterCount.textContent = isActive ? 'ENABLED' : 'DISABLED';
+
+    els.dnsConnLabel.textContent = isActive ? 'DNS Active' : 'DNS Standby';
+    els.dnsConnLabel.style.color = isActive ? 'var(--success-bright)' : 'var(--text-2)';
+    els.dnsConnDot.style.background = isActive ? 'var(--success-bright)' : 'var(--text-4)';
+    els.dnsConnDot.style.boxShadow = isActive
+      ? '0 0 10px var(--success-bright)'
+      : '0 0 6px var(--text-4)';
+  }
+
+  /* ============================================================
+     TOGGLES
+     ============================================================ */
+  function handleMenuToggle(key) {
+    const isCurrentlyActive = state.activeMenu === key;
+
+    if (isCurrentlyActive) {
+      state.activeMenu = null;
+      state.events++;
+      addLog('warn', MODULE_LABELS[key] + ' → DISABLED');
+      showToast(MODULE_LABELS[key] + ' DISABLED', 'off');
+    } else {
+      const prev = state.activeMenu;
+      state.activeMenu = key;
+      state.events++;
+
+      if (prev && prev !== key) {
+        addLog('warn', MODULE_LABELS[prev] + ' → AUTO DISABLED (conflict)');
+      }
+
+      addLog('ok', MODULE_LABELS[key] + ' → ENABLED');
+      showToast(MODULE_LABELS[key] + ' ENABLED', 'on');
+
+      const label = els[key].toggle.parentElement;
+      createRipple(label, 'var(--purple-200)');
+    }
+
+    renderMenu();
+  }
+
+  function handleDnsToggle() {
+    state.dns = !state.dns;
+    state.events++;
+
+    if (state.dns) {
+      addLog('ok', MODULE_LABELS.dns + ' → ENABLED');
+      showToast(MODULE_LABELS.dns + ' ENABLED', 'success');
+      const label = els.dns.toggle.parentElement;
+      createRipple(label, 'var(--success-bright)');
+    } else {
+      addLog('warn', MODULE_LABELS.dns + ' → DISABLED');
+      showToast(MODULE_LABELS.dns + ' DISABLED', 'off');
+    }
+
+    renderDns();
+  }
+
+  /* ============================================================
+     DOWNLOAD DNS (.mobileconfig)
+     ============================================================ */
+  function buildMobileConfig() {
+    // UUID generator
+    const uuid = () =>
+      'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16).toUpperCase();
+      });
+
+    const payloadUUID = uuid();
+    const profileUUID = uuid();
+
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>PayloadContent</key>
+    <array>
+        <dict>
+            <key>DNSSettings</key>
+            <dict>
+                <key>DNSProtocol</key>
+                <string>HTTPS</string>
+                <key>ServerURL</key>
+                <string>https://1.1.1.1/dns-query</string>
+                <key>ServerAddresses</key>
+                <array>
+                    <string>1.1.1.1</string>
+                    <string>1.0.0.1</string>
+                </array>
+            </dict>
+            <key>PayloadDescription</key>
+            <string>DNS ZXOVA ANTIBAN</string>
+            <key>PayloadDisplayName</key>
+            <string>ZXOVA</string>
+            <key>PayloadIdentifier</key>
+            <string>com.zin.zxova.dns.${payloadUUID}</string>
+            <key>PayloadOrganization</key>
+            <string>ZIN ZXOVA</string>
+            <key>PayloadType</key>
+            <string>com.apple.dnsSettings.managed</string>
+            <key>PayloadUUID</key>
+            <string>${payloadUUID}</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+        </dict>
+    </array>
+    <key>PayloadDescription</key>
+    <string>DNS ZXOVA ANTIBAN</string>
+    <key>PayloadDisplayName</key>
+    <string>ZXOVA</string>
+    <key>PayloadIdentifier</key>
+    <string>com.zin.zxova.profile.${profileUUID}</string>
+    <key>PayloadOrganization</key>
+    <string>ZIN ZXOVA</string>
+    <key>PayloadRemovalDisallowed</key>
+    <false/>
+    <key>PayloadType</key>
+    <string>Configuration</string>
+    <key>PayloadUUID</key>
+    <string>${profileUUID}</string>
+    <key>PayloadVersion</key>
+    <integer>1</integer>
+</dict>
+</plist>`;
+  }
+
+  function downloadDns() {
+    els.downloadDns.classList.add('downloading');
+    const icon = els.downloadDns.querySelector('.download-icon');
+    icon.textContent = '◌';
+
+    addLog('info', 'Preparing DNS profile...');
+    showToast('ĐANG TẢI DNS...', 'warn');
+
+    setTimeout(() => {
+      try {
+        const content = buildMobileConfig();
+        const blob = new Blob([content], { type: 'application/x-apple-aspen-config' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'ZXOVA.mobileconfig';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
+
+        addLog('ok', 'Downloaded: ZXOVA.mobileconfig');
+        addLog('info', 'Tên: ZXOVA');
+        addLog('info', 'Bản quyền: ZIN ZXOVA');
+        addLog('info', 'Mô tả: DNS ZXOVA ANTIBAN');
+        showToast('ĐÃ TẢI: ZXOVA.mobileconfig', 'success');
+      } catch (e) {
+        addLog('err', 'Download failed: ' + e.message);
+        showToast('TẢI THẤT BẠI', 'error');
+      } finally {
+        els.downloadDns.classList.remove('downloading');
+        icon.textContent = '⬇';
+      }
+    }, 700);
+  }
+
+  /* ============================================================
+     TABS
+     ============================================================ */
+  function switchTab(tabName) {
+    els.tabs.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.tab === tabName);
+    });
+
+    els.indicator.dataset.pos = tabName === 'dns' ? '1' : '0';
+
+    els.panels.forEach(panel => {
+      panel.classList.toggle('active', panel.dataset.panel === tabName);
+    });
+
+    addLog('info', 'Tab switched → ' + tabName.toUpperCase());
+  }
+
+  /* ============================================================
+     TICKERS
+     ============================================================ */
+  setInterval(() => {
+    if (state.authed) {
+      els.statUptime.textContent = uptimeString();
+    }
+  }, 1000);
+
+  setInterval(() => {
+    if (!state.authed) return;
+    els.ping.textContent = randomPing() + ' ms';
+    if (state.dns) {
+      els.dnsPing.textContent = randomPing() + ' ms';
+      els.dnsStatLatency.textContent = randomPing() + ' ms';
+    } else {
+      els.dnsPing.textContent = '-- ms';
+    }
+  }, 3000);
+
+  /* ============================================================
+     EVENT BINDINGS
+     ============================================================ */
+  els.keySubmit.addEventListener('click', submitKey);
+
+  els.keyInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') submitKey();
+  });
+
+  els.keyInput.addEventListener('input', () => {
+    els.keyInput.classList.remove('error', 'success');
+    els.keyError.classList.remove('show');
+  });
+
+  els.tabs.forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+
+  els.ffth.toggle.addEventListener('change', () => handleMenuToggle('ffth'));
+  els.ffm.toggle.addEventListener('change',  () => handleMenuToggle('ffm'));
+  els.dns.toggle.addEventListener('change',  handleDnsToggle);
+
+  els.downloadDns.addEventListener('click', downloadDns);
+
+  els.clearLog.addEventListener('click', (e) => {
+    e.stopPropagation();
+    els.logBody.innerHTML = '';
+    addLog('info', 'Log cleared by user');
+    showToast('LOG CLEARED', 'off');
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT') return;
+    if (!state.authed) return;
+
+    if (e.key === '1') {
+      els.ffth.toggle.checked = !els.ffth.toggle.checked;
+      els.ffth.toggle.dispatchEvent(new Event('change'));
+    }
+    if (e.key === '2') {
+      els.ffm.toggle.checked = !els.ffm.toggle.checked;
+      els.ffm.toggle.dispatchEvent(new Event('change'));
+    }
+    if (e.key === '3') {
+      els.dns.toggle.checked = !els.dns.toggle.checked;
+      els.dns.toggle.dispatchEvent(new Event('change'));
+    }
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const currentTab = document.querySelector('.tab-btn.active').dataset.tab;
+      switchTab(currentTab === 'menu' ? 'dns' : 'menu');
+    }
+  });
+
+  /* ============================================================
+     INIT
+     ============================================================ */
+  function init() {
+    spawnParticles(20);
+
+    // Auto-fill hint (không tự điền, chỉ placeholder)
+    els.keyInput.placeholder = 'XXXX-XXXX-XXXXX';
+    els.keyInput.focus();
+
+    addLog('info', 'ZXOVA v4.0 booting...');
+    addLog('info', 'Waiting for authentication');
+  }
+
+  init();
+})();
+</script>
+
+</body>
+</html>
